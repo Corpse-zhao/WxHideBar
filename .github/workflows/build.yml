@@ -1,0 +1,49 @@
+name: Build WxHideBar
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain
+        run: brew install make xz ldid
+
+      - name: Setup Theos (roothide)
+        run: |
+          export THEOS=$HOME/theos
+          git clone --recursive https://github.com/roothide/theos.git $THEOS
+          git clone --depth 1 --filter=blob:none --sparse \
+            https://github.com/theos/sdks.git $THEOS/sdks-tmp
+          cd $THEOS/sdks-tmp
+          git sparse-checkout set iPhoneOS14.5.sdk
+          mv iPhoneOS14.5.sdk $THEOS/sdks/
+          rm -rf $THEOS/sdks-tmp
+          ls $THEOS/sdks/
+          ls $THEOS/vendor/mod/
+          echo "THEOS=$THEOS" >> $GITHUB_ENV
+          echo "$THEOS/bin" >> $GITHUB_PATH
+
+      - name: Build package
+        run: gmake package THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1
+
+      - name: Inspect package contents
+        run: |
+          ls -la packages/
+          for d in packages/*.deb; do
+            echo "== $d =="
+            ar p "$d" control.tar.gz | tar -xzO ./control 2>/dev/null || ar p "$d" control.tar.gz | tar -xzO control
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WxHideBar-deb
+          path: packages/*.deb
+          if-no-files-found: error

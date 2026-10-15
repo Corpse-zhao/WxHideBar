@@ -1,0 +1,9 @@
+Package: com.corpsezhao.wxhidebar
+Name: WxHideBar
+Version: 0.1.0
+Architecture: iphoneos-arm
+Description: 隐藏微信键盘工具栏按钮：左下角绿色 logo 按钮与工具栏行最右侧按钮。
+Maintainer: Corpse-zhao
+Author: Corpse-zhao
+Section: Tweaks
+Depends: mobilesubstrate
