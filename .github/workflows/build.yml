@@ -30,25 +30,37 @@ jobs:
           echo "THEOS=$THEOS" >> $GITHUB_ENV
           echo "$THEOS/bin" >> $GITHUB_PATH
 
-      - name: Build package
+      - name: Build WeTypeMain
         run: gmake package THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1
+        working-directory: WeTypeMain
+
+      - name: Build WeTypeKbd
+        run: gmake package THEOS_PACKAGE_SCHEME=roothide FINALPACKAGE=1
+        working-directory: WeTypeKbd
+
+      - name: Collect packages
+        run: |
+          mkdir -p dist
+          cp WeTypeMain/packages/*.deb dist/ 2>/dev/null || true
+          cp WeTypeKbd/packages/*.deb dist/  2>/dev/null || true
+          ls -la dist/
 
       - name: Inspect package contents
         run: |
-          ls -la packages/
-          for d in packages/*.deb; do
+          for d in dist/*.deb; do
             echo "=== $d ==="
             ar p "$d" control.tar.gz | tar -xzO ./control 2>/dev/null \
               || ar p "$d" control.tar.gz | tar -xzO control
             echo "--- payload ---"
-            ar p "$d" data.tar.lzma 2>/dev/null | tar -tJf - 2>/dev/null \
-              || ar p "$d" data.tar.gz 2>/dev/null | tar -tzf - 2>/dev/null \
-              || ar p "$d" data.tar.xz 2>/dev/null | tar -tJf -
+            (ar p "$d" data.tar.lzma 2>/dev/null | tar -tvJf -) \
+              || (ar p "$d" data.tar.gz 2>/dev/null | tar -tvzf -) \
+              || (ar p "$d" data.tar.xz 2>/dev/null | tar -tvJf -) \
+              || echo "(payload list failed)"
           done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: WxHideBar-debs
-          path: packages/*.deb
+          path: dist/*.deb
           if-no-files-found: error
