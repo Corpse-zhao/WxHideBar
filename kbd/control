@@ -1,0 +1,9 @@
+Package: com.corpsezhao.wxhidebarkbd
+Name: WxHideBarKbd
+Version: 0.1.0
+Architecture: iphoneos-arm
+Description: 隐藏微信输入法键盘工具栏按钮（键盘扩展进程版）：左侧绿色 logo 按钮与工具栏最右侧按钮。若主 App 版无效请改装此包。
+Maintainer: Corpse-zhao
+Author: Corpse-zhao
+Section: Tweaks
+Depends: mobilesubstrate

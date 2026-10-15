@@ -37,13 +37,18 @@ jobs:
         run: |
           ls -la packages/
           for d in packages/*.deb; do
-            echo "== $d =="
-            ar p "$d" control.tar.gz | tar -xzO ./control 2>/dev/null || ar p "$d" control.tar.gz | tar -xzO control
+            echo "=== $d ==="
+            ar p "$d" control.tar.gz | tar -xzO ./control 2>/dev/null \
+              || ar p "$d" control.tar.gz | tar -xzO control
+            echo "--- payload ---"
+            ar p "$d" data.tar.lzma 2>/dev/null | tar -tJf - 2>/dev/null \
+              || ar p "$d" data.tar.gz 2>/dev/null | tar -tzf - 2>/dev/null \
+              || ar p "$d" data.tar.xz 2>/dev/null | tar -tJf -
           done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WxHideBar-deb
+          name: WxHideBar-debs
           path: packages/*.deb
           if-no-files-found: error
