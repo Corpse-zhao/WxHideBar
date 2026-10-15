@@ -99,7 +99,7 @@ static void WHBSchedule(NSTimeInterval delay) {
     });
 }
 
-%ctor {
+static void WHBInstallObservers(void) {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
     for (NSString *name in @[UIKeyboardWillShowNotification,
                              UIKeyboardDidShowNotification,
@@ -112,3 +112,8 @@ static void WHBSchedule(NSTimeInterval delay) {
     }
     NSLog(@"[WxHideBar] loaded");
 }
+
+%ctor {
+    WHBInstallObservers();
+}
+
